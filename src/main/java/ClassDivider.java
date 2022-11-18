@@ -1,6 +1,6 @@
 import java.util.Set;
 
-/**
+/*
  * @author Tygo van den Hurk, 1705709
  * @date 18//11/2022
  */
@@ -27,9 +27,7 @@ public class ClassDivider {
         /*
          * If we have no left overs, then it is definitely posible to create those groups
          */
-        if (klas.size() % groupSize == 0) {
-            return true;
-        }
+        boolean noLeftovers = klas.size() % groupSize == 0;
         
         /* 
          * If we have leftovers, but it is possible to create a group that is large enough, but not
@@ -38,9 +36,10 @@ public class ClassDivider {
          * we return true.
          */
         int amountLeftOvers = klas.size() % groupSize;
-        if (amountLeftOvers >= groupSize - deviation || amountLeftOvers <= groupSize + deviation) {
-            return true;
-        }
+        boolean leftoverCanBeGroup = (
+            amountLeftOvers >= groupSize - deviation ||
+            amountLeftOvers <= groupSize + deviation
+        );
                
         /*
          * Otherwise, there are two ways to deal with the leftovers:
@@ -61,9 +60,7 @@ public class ClassDivider {
          */
         int groupsMade = klas.size() / groupSize;
         int extraTolerance = deviation * groupsMade;
-        if (extraTolerance >= amountLeftOvers) {
-            return true;
-        }
+        boolean otherGroupsCanHaveThem = extraTolerance >= amountLeftOvers;
 
         /*
          * we check if we can steal enough students from other groups to fill up the group of 
@@ -71,12 +68,15 @@ public class ClassDivider {
          */
         int smallestGroupCreatable = groupSize - deviation;
         int extraAmountStudentNeeded = smallestGroupCreatable - amountLeftOvers;
-        if (extraAmountStudentNeeded <= extraTolerance) {
-            return true;
-        }
+        boolean enoughStudentsTofillGroupLeftovers = extraAmountStudentNeeded <= extraTolerance;
+        
+        boolean groupable = (
+            noLeftovers || leftoverCanBeGroup || 
+            otherGroupsCanHaveThem || enoughStudentsTofillGroupLeftovers
+        );
         
         // if we could not deal with them then it is not possible, so we return false.
-        return false;
+        return groupable;
     }
     
     /**
@@ -96,7 +96,7 @@ public class ClassDivider {
         /* 
          * amount of groups that definitly fits, since it's basically:
          * Math.floor(klas.size() / groupSize)
-         */
+         * /
         int AmountOfStartGroups = klas.size() / groupSize;
 
         klas.iterator();
@@ -112,7 +112,7 @@ public class ClassDivider {
                 klas.remove(member);
                 returnGroups.add(group);
             }
-        }
+        }*/
         
         return returnGroups;
     }

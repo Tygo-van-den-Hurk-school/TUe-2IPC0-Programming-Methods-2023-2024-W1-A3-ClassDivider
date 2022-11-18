@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
+/*
  * @author Tygo van den Hurk, 1705709
  * @date 18//11/2022
  */
@@ -13,11 +13,18 @@ public class ClassDividerTest {
     
     ClassDivider instance;
     
+    /**
+     * method returns a klas of n students that are inspired by harry potter.
+     * 
+     * @param n the amount of students the klas needs.
+     * @pre {@code n < 9 && n > 0}
+     * @return klas with n students
+     */
     private Group<Student> createKlasOfSize(int n) {
         
         Group<Student> returnKlas = new Group<Student>();
         
-        switch(n){
+        switch(n) {
             case 8:
                 Student crookshanks = new Student("crookshanks", "", "cat");
                 returnKlas.add(crookshanks);
@@ -53,7 +60,7 @@ public class ClassDividerTest {
         return returnKlas;
     }
         
-    private void standardChecks(Group<Student> klas){
+    private void standardChecks(Group<Student> klas) {
 
         this.instance = new ClassDivider();
         boolean result;
@@ -132,7 +139,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest0(){
+    public void isDividableTest0() {
         
         Group<Student> klas = createKlasOfSize(1);
         
@@ -147,7 +154,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest1(){
+    public void isDividableTest1() {
 
         Group<Student> klas = createKlasOfSize(2);
         
@@ -162,7 +169,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest2(){
+    public void isDividableTest2() {
         Group<Student> klas = createKlasOfSize(3);
         
         // try the standart test sweet
@@ -176,7 +183,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest3(){
+    public void isDividableTest3() {
         Group<Student> klas = createKlasOfSize(4);
         
         // try the standart test sweet
@@ -190,7 +197,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest4(){
+    public void isDividableTest4() {
         Group<Student> klas = createKlasOfSize(5);
         
         // try the standart test sweet
@@ -204,7 +211,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest5(){
+    public void isDividableTest5() {
         Group<Student> klas = createKlasOfSize(6);
         
         // try the standart test sweet
@@ -218,7 +225,7 @@ public class ClassDividerTest {
     }
     
     @Test 
-    public void isDividableTest6(){
+    public void isDividableTest6() {
         Group<Student> klas = createKlasOfSize(7);
         
         // try the standart test sweet
@@ -231,7 +238,8 @@ public class ClassDividerTest {
         // TODO
     }
     
-    public void isDividableTest7(){
+    @Test
+    public void isDividableTest7() {
         Group<Student> klas = createKlasOfSize(8);
         
         // try the standart test sweet

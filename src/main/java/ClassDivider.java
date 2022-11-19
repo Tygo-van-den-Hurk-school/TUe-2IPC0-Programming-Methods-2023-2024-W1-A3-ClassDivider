@@ -1,6 +1,5 @@
 import java.util.Iterator;
 import java.util.Set;
-import java.util.List;
 
 /*
  * @author Tygo van den Hurk, 1705709
@@ -106,7 +105,7 @@ public class ClassDivider {
          * when all the code has run. For now this group is ofcourse empty, since we have not added
          * any groups of students to this.
          */
-        Group<Group<Student>> returnGroups = new Group<Group<Student>>();
+        Group<Group<Student>> returnGroups = new Group<>();
         
         /*
          * first we check if the devision is indeed possible, if not we return an empty group.
@@ -130,7 +129,7 @@ public class ClassDivider {
         
         for (int i = 0; i < amountOfStartGroups; i++) {
                       
-            Group<Student> studentGroup = new Group<Student>();
+            Group<Student> studentGroup = new Group<>();
 
             // now we add students to every group.
             for (int j = 0; j < groupSize; j++) {
@@ -168,7 +167,7 @@ public class ClassDivider {
         if (this.isValidGroup(leftOvers, groupSize, deviation)) { // Case II:
             // add all the leftovers to their own group and then add that to the set of groups.
             returnGroups.add(
-                groupOfcombinedLeftovers(
+                this.groupOfcombinedLeftovers(
                     returnGroups,
                     students,
                     klas,
@@ -178,10 +177,20 @@ public class ClassDivider {
             );
         
         } else if (this.canSpreadLeftOvers(leftOvers, amountOfStartGroups, deviation)) { // Case III:
-            
+            /* 
+             * we now make a group of the left overs and fill it by stealing members from other 
+             * groups, using the stealFromOtherGroups method.
+             */
+            returnGroups = this.stealFromOtherGroups(
+                returnGroups,
+                students,
+                klas,
+                groupSize,
+                deviation
+            );
         }
         
-        
+        // then everything should be done, and we can return the result.
         return returnGroups;
     }
     
@@ -198,7 +207,7 @@ public class ClassDivider {
      * @param klas is a set of students.
      * @param groupSize is the size a group should be.
      * @param deviation is the max amount a group of students can miss or have extra.
-     * @return A group of groups of students, where all the groups are unique and students
+     * @return A group of students, where all the elements within are unique.
      * only appear once in total.
      */
     protected Group<Student> groupOfcombinedLeftovers(
@@ -211,7 +220,7 @@ public class ClassDivider {
         /*
          * we create an new group where we put the leftovers in.
          */
-        Group<Student> leftoversGroup = new Group<Student>();
+        Group<Student> leftoversGroup = new Group<>();
 
         /*
          * while there are still students without a group, we add them to the left over group.
@@ -224,7 +233,21 @@ public class ClassDivider {
         return leftoversGroup;
     }
     
-    protected Group<Group<Student>> SpreadOverflowToGroups(
+    /**
+     * creates a group of students that did not have a group before, then fills it up with students
+     * from other groups until it is big enough, it then returns this, so that it has created n 
+     * groups with each having x students plus minus the deviation.
+     * 
+     * @param returnGroups
+     * @param students
+     * @param klas
+     * @param groupSize
+     * @param deviation
+     * @return the set of groups of students, for which each group is unigue and so are the 
+     * students within them, with each group having a size of {@code groupSize} plus minus 
+     * deviation.
+     */
+    protected Group<Group<Student>> stealFromOtherGroups(
         Group<Group<Student>> returnGroups,
         Iterator<Student> students,
         Group<Student> klas,
@@ -258,7 +281,8 @@ public class ClassDivider {
         for (int studentStolen = 0; studentStolen < studentsToComplete; studentsToComplete++) {
             Group<Student> groupToStealFrom = returnGroupsIterator.next();
             Student member = groupToStealFrom.pick();
-
+            groupToStealFrom.remove(member);
+            leftoversGroup.add(member);
         }
 
         /* 

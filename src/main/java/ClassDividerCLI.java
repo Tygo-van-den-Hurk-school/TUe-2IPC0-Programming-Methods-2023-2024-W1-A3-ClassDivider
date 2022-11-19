@@ -16,13 +16,16 @@ import picocli.CommandLine.Spec;
 /**
  * ClassDivider–Divide a class of students into groups.
  *
- * @version 0.6
+ * @version 0.10
  * @author Huub de Beer
+ * @author Tygo van den Hurk
+ * 
+ * I am adding my name since I wrote some of the code now.
  */
 @Command(
         name = "classdivider",
         mixinStandardHelpOptions = true,
-        version = "classdivider 0.6",
+        version = "classdivider 0.10",
         description = "Divide a class of students into groups.")
 public class ClassDividerCLI implements Callable<Integer> {
 
@@ -181,5 +184,4 @@ public class ClassDividerCLI implements Callable<Integer> {
         int exitCode = new CommandLine(new ClassDividerCLI()).execute(args);
         System.exit(exitCode);
     }
-
 }

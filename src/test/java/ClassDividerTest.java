@@ -24,7 +24,13 @@ public class ClassDividerTest {
         
         Group<Student> returnKlas = new Group<Student>();
         
-        switch(n) {
+        /*
+         * Thanks to the FallThrough macanic of the switch, it will go from the top,
+         * n steps down, creating n students in the process without any duplicate code.
+         * the problem with this approch is that moto moto does not like theses FallThroughs
+         * and sees them as checkSytle errors.
+         */
+        switch (n) {
             case 8:
                 Student crookshanks = new Student("crookshanks", "", "cat");
                 returnKlas.add(crookshanks);
@@ -50,11 +56,6 @@ public class ClassDividerTest {
                 Student harryPotter = new Student("Harry", "Potter", "theBoyWhoLived");
                 returnKlas.add(harryPotter);
                 System.out.println("Created a klas of size " + n);
-                break;
-            default:
-                System.out.println(
-                    "that was not a legal amount of people this method supports right now"
-                );
         }
         
         return returnKlas;

@@ -20,11 +20,10 @@ import picocli.CommandLine.Spec;
  * @author Huub de Beer
  */
 @Command(
-    name = "classdivider",
-    mixinStandardHelpOptions = true,
-    version = "classdivider 0.6",
-    description = "Divide a class of students into groups."
-)
+        name = "classdivider",
+        mixinStandardHelpOptions = true,
+        version = "classdivider 0.6",
+        description = "Divide a class of students into groups.")
 public class ClassDividerCLI implements Callable<Integer> {
 
     /*
@@ -93,22 +92,10 @@ public class ClassDividerCLI implements Callable<Integer> {
         int nrOfGroups = klas.size() / groupSize;
         int overflow = klas.size() % groupSize;
 
-        // to make the next if statement more readable.
-        boolean statement0 = (nrOfGroups / deviation > overflow);
-        boolean statement1 = (
-            groupSize - deviation <= overflow && overflow <= groupSize + deviation
-        );
-        boolean statement2 = (
-            groupSize - deviation <= overflow + nrOfGroups * deviation && 
-            overflow + nrOfGroups * deviation <= groupSize + deviation
-        );
-        
-        if (!(statement0 || statement1 || statement2)) {
+        if (!((nrOfGroups / deviation > overflow) || (groupSize - deviation <= overflow && overflow <= groupSize + deviation) || (groupSize - deviation <= overflow + nrOfGroups * deviation && overflow + nrOfGroups * deviation <= groupSize + deviation))) {
             throw new ParameterException(
                     commandSpec.commandLine(),
-                    "Unable to divide a class of %d into groups of %d+/-%d students.".formatted(
-                            klas.size(), groupSize, deviation
-                    )
+                    "Unable to divide a class of %d into groups of %d+/-%d students.".formatted(klas.size(), groupSize, deviation)
             );
         }
 

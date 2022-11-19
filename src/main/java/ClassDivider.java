@@ -75,7 +75,6 @@ public class ClassDivider {
             otherGroupsCanHaveThem || enoughStudentsTofillGroupLeftovers
         );
         
-        // if we could not deal with them then it is not possible, so we return false.
         return groupable;
     }
     

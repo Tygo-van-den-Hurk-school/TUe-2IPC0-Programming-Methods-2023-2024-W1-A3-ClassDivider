@@ -1,7 +1,7 @@
 import java.util.Iterator;
 import java.util.Set;
 
-/*
+/**
  * @author Tygo van den Hurk, 1705709
  * @date 18//11/2022
  */
@@ -35,7 +35,7 @@ public class ClassDivider {
          */
         boolean groupSizeToLarge = klas.size() < groupSize - deviation;
         boolean groupSizeToSmall = groupSize + deviation <= 0;
-        boolean devisionByZero = groupSize == 0;
+        boolean devisionByZero = groupSize <= 0;
         
         // guard statement
         if (groupSizeToLarge || groupSizeToSmall || devisionByZero) {
@@ -54,9 +54,7 @@ public class ClassDivider {
          * are no left overs, and thus we conclude that is possible to create those groups and so 
          * we return true.
          */
-        boolean fitsLowerLimit = amountLeftOvers >= groupSize - deviation;
-        boolean fitsUpperLimit =  amountLeftOvers <= groupSize + deviation;
-        boolean fits = fitsLowerLimit && fitsUpperLimit;
+        boolean fits = this.isValidGroup(amountLeftOvers,groupSize, deviation);
                
         /*
          * Otherwise, there are two ways to deal with the leftovers:
@@ -120,7 +118,7 @@ public class ClassDivider {
          */
         Iterator<Student> students = klas.iterator();
         
-        /** 
+        /*
          * amount of groups that definitely fits is basically: {@code Math.floor( klas.size() / 
          * groupSize)}, this also means that there might be a few leftovers, but we will deal 
          * with these later.
@@ -146,10 +144,10 @@ public class ClassDivider {
          * We now have m leftover students, where m == klas.size() % groupSize.
          * We now have one of three senerairios:
          *   case I:    there are no leftOvers and the groups is complete.
-         *   Case II:   there are leftovers, but there are enough to make a group of, and we can then call
-         *              it a day, and return the groups.
-         *   Case III:  there are not enough left overs to make a group out of, but there are enough 
-         *              students in other groups that we can steal to fill up this group.
+         *   Case II:   there are leftovers, but there are enough to make a group of, and we can
+         *              then call it a day, and return the groups.
+         *   Case III:  there are not enough left overs to make a group out of, but there are 
+         *              enough students in other groups that we can steal to fill up this group.
          *
          * the most efficent way to in my opinion do this is to make a few if statements, and then 
          * make a method call depending on the case, and then return the outcome of that method.
@@ -164,8 +162,10 @@ public class ClassDivider {
          *   
          * } else ...
          */
-        if (this.isValidGroup(leftOvers, groupSize, deviation)) { // Case II:
-            // add all the leftovers to their own group and then add that to the set of groups.
+        if (this.isValidGroup(leftOvers, groupSize, deviation)) {
+            /* Case II:
+             *   add all the leftovers to their own group and then add that to the set of groups.
+             */
             returnGroups.add(
                 this.groupOfcombinedLeftovers(
                     returnGroups,
@@ -176,10 +176,10 @@ public class ClassDivider {
                 )
             );
         
-        } else if (this.canSpreadLeftOvers(leftOvers, amountOfStartGroups, deviation)) { // Case III:
-            /* 
-             * we now make a group of the left overs and fill it by stealing members from other 
-             * groups, using the stealFromOtherGroups method.
+        } else if (this.canSpreadLeftOvers(leftOvers, amountOfStartGroups, deviation)) { 
+            /* Case III:
+             *   we now make a group of the left overs and fill it by stealing members from other 
+             *   groups, using the stealFromOtherGroups method.
              */
             returnGroups = this.stealFromOtherGroups(
                 returnGroups,
@@ -238,11 +238,11 @@ public class ClassDivider {
      * from other groups until it is big enough, it then returns this, so that it has created n 
      * groups with each having x students plus minus the deviation.
      * 
-     * @param returnGroups
-     * @param students
-     * @param klas
-     * @param groupSize
-     * @param deviation
+     * @param returnGroups is the set of groups that is already created
+     * @param students is the iterator to go over the set of students in the klas
+     * @param klas is a set of students.
+     * @param groupSize is the size a group should be.
+     * @param deviation is the max amount a group of students can miss or have extra.
      * @return the set of groups of students, for which each group is unigue and so are the 
      * students within them, with each group having a size of {@code groupSize} plus minus 
      * deviation.
@@ -302,7 +302,7 @@ public class ClassDivider {
      * @param groupSize the size of the groups in the klas
      * @return {@code \return == klasSize / groupSize}
      */
-    protected int amountOfGroups(int klasSize, int groupSize){
+    protected int amountOfGroups(int klasSize, int groupSize) {
         return klasSize / groupSize;
     }
     
@@ -315,7 +315,7 @@ public class ClassDivider {
      * @param groupSize the size of the groups in the klas
      * @return {@code \return == klasSize % groupSize}
      */
-    protected int amountLeftover(int klasSize, int groupSize){
+    protected int amountLeftover(int klasSize, int groupSize) {
         return klasSize % groupSize;
     }
     
@@ -338,14 +338,14 @@ public class ClassDivider {
             (requestedGroupSize - requestedDeviation <= currentGroupSize)
             &&
             (currentGroupSize <= requestedGroupSize + requestedDeviation)
-        );
+            );
     }
     
     /**
-     * checks if it possible to spread the students over different groups
+     * Checks if it possible to spread the students over different groups.
      * 
      * @param leftOvers is the amount of students without a group.
-     * @param groupsize is the size a group such be plus minus the deviation.
+     * @param amountOfGroups is the size a group such be plus minus the deviation.
      * @param deviation is the max amount of students a group can be missing or have extra.
      * @return {@code
      *     ((deviation * amountOfGroups) >= leftOvers)

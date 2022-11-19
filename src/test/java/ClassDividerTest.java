@@ -1,9 +1,9 @@
 import static org.junit.jupiter.api.Assertions.*;
-
+import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.jupiter.api.Test;
+import java.util.Set;
 
 /**
  * Class that tests ClassDivider.
@@ -19,52 +19,47 @@ public class ClassDividerTest {
      * method returns a klas of n students that are inspired by harry potter.
      * 
      * @param n the amount of students the klas needs.
-     * @pre {@code n < 9 && n > 0}
-     * @return klas with n students
+     * @pre {@code n < 9 && n > 0}.
+     * @return klas with n students.
+     * @throws outOfBoundsExecepition when {@code n > 8}.
      */
     private Group<Student> createKlasOfSize(int n) {
         
         Group<Student> returnKlas = new Group<Student>();
         
-        /*
-         * Thanks to the FallThrough macanic of the switch, it will go from the top,
-         * n steps down, creating n students in the process without any duplicate code.
-         * the problem with this approch is that moto moto does not like theses FallThroughs
-         * and sees them as checkSytle errors.
-         */
-        switch (n) {
-            case 8:
-                Student crookshanks = new Student("crookshanks", "", "cat");
-                returnKlas.add(crookshanks);
-            case 7:
-                Student profAlbus = new Student("Albus", "Dumbledore", "long beard");
-                returnKlas.add(profAlbus);                
-            case 6:
-                Student heWhoShallNotBeNamed = new Student("", "", "heWhoShallNotBeNamed");
-                returnKlas.add(heWhoShallNotBeNamed);                
-            case 5:
-                Student profSnape = new Student("Severus", "Snape", "proffesorSnake");
-                returnKlas.add(profSnape);
-            case 4:
-                Student dracoMalfroy = new Student("Draco", "Malfroy", "theSnake");
-                returnKlas.add(dracoMalfroy);
-            case 3:
-                Student hermioneGranger = new Student("Hermione", "Granger", "theKnowItAll");
-                returnKlas.add(hermioneGranger);
-            case 2:
-                Student ronWeasley = new Student("Ron", "Weasley", "theGinger");
-                returnKlas.add(ronWeasley);
-            case 1:
-                Student harryPotter = new Student("Harry", "Potter", "theBoyWhoLived");
-                returnKlas.add(harryPotter);
-                break;
-            default:
-                System.out.println("That was not a legal number of students.");
+        String[][] firstLastNamePlusID = {
+            {"crookshanks", "", "cat"},
+            {"Albus", "Dumbledore", "long beard"},
+            {"", "", "heWhoShallNotBeNamed"},
+            {"Severus", "Snape", "proffesorSnake"},
+            {"Draco", "Malfroy", "theSnake"},
+            {"Hermione", "Granger", "theKnowItAll"},
+            {"Ron", "Weasley", "theGinger"},
+            {"Harry", "Potter", "theBoyWhoLived"}
+        };
+                
+        for (int i = 0; i < n; i++) {
+            
+            // pick the information from the array
+            String firstName = firstLastNamePlusID[i][0];
+            String lastName = firstLastNamePlusID[i][1];
+            String studentID = firstLastNamePlusID[i][2];
+
+            Student member = new Student(firstName, lastName, studentID);
+            
+            returnKlas.add(member);
         }
         
         return returnKlas;
     }
         
+    /**
+     * Does a few standart tests to the ClassDivide.isDividable method
+     * 
+     * @pre true
+     * @param klas a klas of students to split
+     * @post true
+     */
     private void standardChecks(Group<Student> klas) {
 
         this.instance = new ClassDivider();
@@ -423,5 +418,47 @@ public class ClassDividerTest {
              result,
              "it failed subTest 8, please check in which method for the specific case"
         );
+    }
+    
+    /**
+     * Tests the divide method of the ClassDivider object.
+     * 
+     * @param klas a set of students that we can divide into groups.
+     * @param groupSize is the size of the groups the set of students should be divided in, plus 
+     * minus the deviation.
+     * @param deviation the max amount of students a group can miss or have extra.
+     */
+    private void standartCheckDivide(Set<Student> klas, int groupSize, int deviation, boolean x){
+        this.instance = new ClassDivider();
+
+        set<Group<Student>> splittedKlas = this.instance.divide(klas, groupSize, deviation);
+        
+        // we will use the and on this time and time again, and then see if it still true.
+        boolean result = true;
+        
+        for ( groupOfStudents : splittedKlas) {
+            
+            result = (
+                result
+                &&
+                (groupOfStudents.size() >= groupSize + deviation)
+                &&
+                (groupOfStudents.size() <= groupSize - deviation)
+            );
+        }
+        
+        String message = splittedKlas.toSting();
+        
+        assertEquals(x, result, "this was the object: \n\n" + splittedKlas + "\n\n");
+    }
+            
+    @Test
+    public void divideTest0() {
+        Group<Student> klas = createKlasOfSize(1);
+        
+        this.instance = new ClassDivider();
+        
+        // subtest 1
+        standartCheckDivide(klas, 1, 0, true);
     }
 }

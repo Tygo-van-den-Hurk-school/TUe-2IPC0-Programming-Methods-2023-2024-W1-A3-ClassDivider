@@ -1,10 +1,6 @@
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -63,6 +59,12 @@ public class ClassDividerCLI implements Callable<Integer> {
     @Spec
     CommandSpec commandSpec; // injected by picocli
 
+    /*
+     * the class devider object that will check if with the current parameters the class is 
+     * devidable, and devide it if so.
+     */
+    private final ClassDivider classDivider = new ClassDivider();
+            
     @Override
     public Integer call() {
         // Note. "klas" is Dutch for "class". We cannot use "class" because it is a Java keyword.
@@ -78,106 +80,40 @@ public class ClassDividerCLI implements Callable<Integer> {
                             .formatted(studentsFile, e));
         }
 
-        if (groupSize
-                <= 0) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "group size must be a positive integer number.");
-        }
-
-        if (deviation >= groupSize || deviation
-                < 0) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "deviation must be a positive number smaller than group size.");
-        }
-
-        int nrOfGroups = klas.size() / groupSize;
-        int overflow = klas.size() % groupSize;
-
-        if (!((nrOfGroups / deviation > overflow) || (groupSize - deviation <= overflow && overflow <= groupSize + deviation) || (groupSize - deviation <= overflow + nrOfGroups * deviation && overflow + nrOfGroups * deviation <= groupSize + deviation))) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "Unable to divide a class of %d into groups of %d+/-%d students.".formatted(klas.size(), groupSize, deviation)
+        /*
+         * first we check if the devision is indeed possible, if not we return an empty group.
+         */
+        if (!classDivider.isDividable(klas, groupSize, deviation)) {
+            throw new IllegalArgumentException(
+                    "With these parameters, it is not possible to devide."
             );
         }
+        
+        /*
+         * the object groups will be used to store a set of groups of students.
+         */
+        Set<Group<Student>> groups;
+                
+        groups = classDivider.divide(klas, groupSize, deviation);
 
-        // Divide class into groups
-        Iterator<Student> students = klas.iterator();
-        List<Group<Student>> groupSet = new ArrayList<>();
-
-        for (int g = 0; g < nrOfGroups; g++) {
-            Group<Student> group = new Group<>();
-
-            for (int size = 0; size < groupSize; size++) {
-                group.add(students.next());
-            }
-
-            groupSet.add(group);
-        }
-
-        if (nrOfGroups / deviation > overflow) {
-            for (int d = 0; d < deviation && overflow > 0; d++) {
-                for (int g = 0; g < nrOfGroups && overflow > 0; g++) {
-                    Group<Student> group = groupSet.get(g);
-                    group.add(students.next());
-                    overflow--;
-                }
-            }
-        } else {
-            Group<Student> separateGroup = new Group<>();
-
-            for (int i = 0; i < overflow; i++) {
-                separateGroup.add(students.next());
-            }
-
-            for (int d = 0; d < deviation && separateGroup.size() < groupSize - deviation; d++) {
-                int g = groupSet.size();
-
-                while (separateGroup.size() < groupSize - deviation) {
-                    g--;
-                    Group<Student> group = groupSet.get(g);
-                    Student student = group.pick();
-                    separateGroup.add(student);
-                    group.remove(student);
-                }
-            }
-
-            groupSet.add(separateGroup);
-        }
-
-        Map<String, Boolean> uniqueFirstName = new HashMap<>();
-
-        for (Student student : klas) {
-            if (uniqueFirstName.containsKey(student.firstName())) {
-                uniqueFirstName.put(student.firstName(), false);
-            } else {
-                uniqueFirstName.put(student.firstName(), true);
-            }
-        }
-
-        // Print group set to standard output
-        int groupNr = 0;
-
-        for (Group<Student> group : groupSet) {
-            groupNr++;
-
-            System.out.printf("Group %d:%n", groupNr);
-
-            for (Student student : group) {
-                String name = student.firstName();
-
-                if (!uniqueFirstName.get(student.firstName())) {
-                    name += " " + student.sortName().charAt(0);
-                }
-
-                System.out.println("- " + name);
-            }
-
-            System.out.println();
-        }
+        // now we finish by printing the groups
+        this.printGroups(groups);
 
         return 0;
+    }
+
+    private void printGroups(Set<Group<Student>> groups) {
+        
+        // to keep track of index of the for loop
+        int index = 0;
+        
+        for (Group<Student> group : groups) {
+            index++;
+            System.out.print("Group " + index);
+            for (Student student : group) {
+                System.out.print(" - " + student.sortName());
+            }   
+        }
     }
 
     public static void main(String[] args) {

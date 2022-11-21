@@ -2,6 +2,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * helps with dividing a set of students into a set of groups of students where for each group,
+ * it in itself is unique, and so are its elements.
+ * 
  * @author Tygo van den Hurk, 1705709
  * @date 18//11/2022
  */
@@ -54,7 +57,7 @@ public class ClassDivider {
          * are no left overs, and thus we conclude that is possible to create those groups and so 
          * we return true.
          */
-        boolean fits = this.isValidGroup(amountLeftOvers,groupSize, deviation);
+        boolean fits = this.isValidGroup(amountLeftOvers, groupSize, deviation);
                
         /*
          * Otherwise, there are two ways to deal with the leftovers:
@@ -89,29 +92,35 @@ public class ClassDivider {
      * splits the set of students into n {@code Groups} of {@code groupSize}
      * {@code Student}'s, plus minus the allowed {@code deviation}.
      * 
-     * @pre {@code groupSize > 0 && groupSize > deviation}
+     * @pre {@code
+     *      klas != null
+     *      &&
+     *      groupSize > 0 
+     *      && 
+     *      groupSize > deviation
+     *      &&
+     *      !this.isDividable(
+     *          klas,
+     *          groupSize,
+     *          deviation
+     *      )
+     * }
      * @param klas is the set of students to divide into groups.
      * @param groupSize is the size of the groups to create.
      * @param deviation is the max amount of students a group can miss or have extra.
      * @return a set of groups that all have a big enough group size, and all have unique elements
      * and are all unique themselves.
+     * @throws IllegalArgumentException when with the current arguments, a division is not 
+     * possible.
      */
     public Set<Group<Student>> divide(Group<Student> klas, int groupSize, int deviation) { 
-        
+                
         /*
          * first we create a group of, groups of students. This is the Object we wish to return 
          * when all the code has run. For now this group is ofcourse empty, since we have not added
          * any groups of students to this.
          */
         Group<Group<Student>> returnGroups = new Group<>();
-        
-        /*
-         * first we check if the devision is indeed possible, if not we return an empty group.
-         */
-        if (!this.isDividable(klas, groupSize, deviation)) {
-            System.out.print("this is not possible.");
-            return returnGroups;
-        }
         
         /*
          * to go through all the students, we will need a random iterator.
@@ -124,7 +133,7 @@ public class ClassDivider {
          * with these later.
          */
         int amountOfStartGroups = amountOfGroups(klas.size(), groupSize);
-        
+       
         for (int i = 0; i < amountOfStartGroups; i++) {
                       
             Group<Student> studentGroup = new Group<>();
@@ -269,8 +278,8 @@ public class ClassDivider {
          * amount of students, they will form a new group together with the leftovers that meets
          * the requirements, as well as keeps the requirements for the other groups in tact.
          */
-        int Leftovers = amountLeftover(klas.size(), groupSize);
-        int studentsToComplete = (groupSize - deviation) - Leftovers;
+        int leftovers = amountLeftover(klas.size(), groupSize);
+        int studentsToComplete = (groupSize - deviation) - leftovers;
 
         Iterator<Group<Student>> returnGroupsIterator = returnGroups.iterator();
 

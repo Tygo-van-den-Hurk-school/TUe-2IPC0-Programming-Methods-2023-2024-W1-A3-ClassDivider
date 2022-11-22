@@ -61,5 +61,8 @@ public record Student(String firstName, String lastName, String id) {
         }
         return false;
     }
-
+    
+    public String getID() {
+        return this.id;
+    }
 }

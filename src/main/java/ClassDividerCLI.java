@@ -1,3 +1,4 @@
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
@@ -15,7 +16,7 @@ import picocli.CommandLine.Spec;
  * @version 0.10
  * @author Huub de Beer
  * @author Tygo van den Hurk
- * 
+ *
  * I am adding my name since I wrote some of the code now.
  */
 @Command(
@@ -64,36 +65,44 @@ public class ClassDividerCLI implements Callable<Integer> {
      * devidable, and devide it if so.
      */
     private final ClassDivider classDivider = new ClassDivider();
-            
-    @Override
-    public Integer call() {
-        // Note. "klas" is Dutch for "class". We cannot use "class" because it is a Java keyword.
-        Group<Student> klas;
 
+    /**
+     * imports the class, and validates user input from it.
+     * 
+     * @pre true
+     */
+    private Group<Student> importClass() {
         // Validate user input
         try {
-            klas = StudentsFile.fromCSV(studentsFile);
+            return StudentsFile.fromCSV(this.studentsFile);
         } catch (IOException e) {
             throw new ParameterException(
-                    commandSpec.commandLine(),
+                    this.commandSpec.commandLine(),
                     "Unable to open or read students file '%s': %s."
-                            .formatted(studentsFile, e));
+                            .formatted(this.studentsFile, e));
         }
-
+    }
+    
+    @Override
+    public Integer call() {
+        
+        // Note. "klas" is Dutch for "class". We cannot use "class" because it is a Java keyword.
+        Group<Student> klas = importClass();
+        
         /*
-         * first we check if the devision is indeed possible, if not we return an empty group.
+         * first we check if the devision is indeed possible, if not we throw a exception.
          */
         if (!classDivider.isDividable(klas, groupSize, deviation)) {
             throw new IllegalArgumentException(
                     "With these parameters, it is not possible to devide."
             );
         }
-        
+
         /*
          * the object groups will be used to store a set of groups of students.
          */
         Set<Group<Student>> groups;
-                
+
         groups = classDivider.divide(klas, groupSize, deviation);
 
         // now we finish by printing the groups
@@ -103,16 +112,16 @@ public class ClassDividerCLI implements Callable<Integer> {
     }
 
     private void printGroups(Set<Group<Student>> groups) {
-        
+
         // to keep track of index of the for loop
         int index = 0;
-        
+
         for (Group<Student> group : groups) {
             index++;
-            System.out.print("Group " + index);
+            System.out.print("\nGroup " + index + ":\n");
             for (Student student : group) {
-                System.out.print(" - " + student.sortName());
-            }   
+                System.out.print(" - " + student.sortName() + "\n");
+            }
         }
     }
 

@@ -30,6 +30,13 @@ public class ClassDividerTest {
         
         this.instance = new ClassDivider();
 
+        assertEquals(
+                expectation,
+                instance.isDividable(klas, groupSize, deviation),
+                "expectation does not match instance.isDividable(klas, groupSize, deviation)"
+        );
+
+        
         Set<Group<Student>> splittedKlas = this.instance.divide(klas, groupSize, deviation);
         Iterator<Group<Student>> groups = splittedKlas.iterator();
 
@@ -42,9 +49,9 @@ public class ClassDividerTest {
             result = (
                 result
                 &&
-                (groupOfStudents.size() >= groupSize + deviation)
+                (groupOfStudents.size() <= groupSize + deviation)
                 &&
-                (groupOfStudents.size() <= groupSize - deviation)
+                (groupOfStudents.size() >= groupSize - deviation)
                 );
             System.out.print("    groupOfStudents.size() = " + groupOfStudents.size() + "\n");
         }
@@ -52,8 +59,6 @@ public class ClassDividerTest {
         String message = splittedKlas.toString();
         
         assertEquals(expectation, result, "this was the object: \n\n" + splittedKlas + "\n\n");
-        System.out.println("");
-
     }
     
     private Group<Student> createKlasOfSize(int n) {
@@ -453,13 +458,311 @@ public class ClassDividerTest {
         );
     }
             
-    /*@Test
+    @Test
     public void divideTest0() {
         Group<Student> klas = createKlasOfSize(1);
         
-        this.instance = new ClassDivider();
-        
-        // subtest 1
         standartCheckDivide(klas, 1, 0, true);
-    }*/
+        standartCheckDivide(klas, 1, 1, true);
+
+    }
+    
+    @Test
+    public void divideTest1() {
+        Group<Student> klas = createKlasOfSize(2);
+        
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest2() {
+        Group<Student> klas = createKlasOfSize(3);
+        
+        standartCheckDivide(klas, 3, 0, true);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, false);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest3() {
+        Group<Student> klas = createKlasOfSize(4);
+        
+        standartCheckDivide(klas, 4, 0, true);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 3, 0, false);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest4() {
+        Group<Student> klas = createKlasOfSize(5);
+        
+        standartCheckDivide(klas, 5, 0, true);
+        standartCheckDivide(klas, 5, 1, true);
+        standartCheckDivide(klas, 4, 0, false);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 3, 0, false);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest5() {
+        Group<Student> klas = createKlasOfSize(6);
+        
+        standartCheckDivide(klas, 6, 0, true);
+        standartCheckDivide(klas, 6, 1, true);
+        standartCheckDivide(klas, 5, 0, false);
+        standartCheckDivide(klas, 5, 1, true);
+        standartCheckDivide(klas, 4, 0, false);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 3, 0, true);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest6() {
+        Group<Student> klas = createKlasOfSize(7);
+        
+        standartCheckDivide(klas, 7, 0, true);
+        standartCheckDivide(klas, 7, 1, true);
+        standartCheckDivide(klas, 6, 0, false);
+        standartCheckDivide(klas, 6, 1, true);
+        standartCheckDivide(klas, 5, 0, false);
+        standartCheckDivide(klas, 5, 1, false);
+        standartCheckDivide(klas, 4, 0, false);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 3, 0, false);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, false);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest7() {
+        Group<Student> klas = createKlasOfSize(8);
+        
+        standartCheckDivide(klas, 8, 0, true);
+        standartCheckDivide(klas, 8, 1, true);
+        standartCheckDivide(klas, 7, 0, false);
+        standartCheckDivide(klas, 7, 1, true);
+        standartCheckDivide(klas, 6, 0, false);
+        standartCheckDivide(klas, 6, 1, false);
+        standartCheckDivide(klas, 5, 0, false);
+        standartCheckDivide(klas, 5, 1, true);
+        standartCheckDivide(klas, 4, 0, true);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 3, 0, false);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
+    
+    @Test
+    public void divideTest8() {
+        Group<Student> klas = createKlasOfSize(16);
+
+        standartCheckDivide(klas, 16, 3, true);
+        standartCheckDivide(klas, 16, 2, true);
+        standartCheckDivide(klas, 16, 1, true);
+        standartCheckDivide(klas, 16, 0, true);
+
+        
+        standartCheckDivide(klas, 15, 3, true);
+        standartCheckDivide(klas, 15, 2, true);
+        standartCheckDivide(klas, 15, 1, true);
+        standartCheckDivide(klas, 15, 0, false);
+        
+        standartCheckDivide(klas, 14, 3, true);
+        standartCheckDivide(klas, 14, 2, true);
+        standartCheckDivide(klas, 14, 1, false);
+        standartCheckDivide(klas, 14, 0, false);
+        
+        standartCheckDivide(klas, 13, 3, true);
+        standartCheckDivide(klas, 13, 2, false);
+        standartCheckDivide(klas, 13, 1, false);
+        standartCheckDivide(klas, 13, 0, false);
+        
+        standartCheckDivide(klas, 12, 3, false);
+        standartCheckDivide(klas, 12, 2, false);
+        standartCheckDivide(klas, 12, 1, false);
+        standartCheckDivide(klas, 12, 0, false);
+        
+        standartCheckDivide(klas, 11, 3, true);
+        standartCheckDivide(klas, 11, 2, false);
+        standartCheckDivide(klas, 11, 1, false);
+        standartCheckDivide(klas, 11, 0, false);
+        
+        standartCheckDivide(klas, 10, 3, true);
+        standartCheckDivide(klas, 10, 2, true);
+        standartCheckDivide(klas, 10, 1, false);
+        standartCheckDivide(klas, 10, 0, false);
+        
+        standartCheckDivide(klas, 9, 3, true);
+        standartCheckDivide(klas, 9, 2, true);
+        standartCheckDivide(klas, 9, 1, true);
+        standartCheckDivide(klas, 9, 0, false);
+        
+        standartCheckDivide(klas, 8, 3, true);
+        standartCheckDivide(klas, 8, 2, true);
+        standartCheckDivide(klas, 8, 1, true);
+        standartCheckDivide(klas, 8, 0, true);
+        
+        standartCheckDivide(klas, 7, 3, true);
+        standartCheckDivide(klas, 7, 2, true);
+        standartCheckDivide(klas, 7, 1, true);
+        standartCheckDivide(klas, 7, 0, false);
+        
+        standartCheckDivide(klas, 6, 3, true);
+        standartCheckDivide(klas, 6, 2, true);
+        standartCheckDivide(klas, 6, 1, false);
+        standartCheckDivide(klas, 6, 0, false);
+        
+        standartCheckDivide(klas, 5, 3, true);
+        standartCheckDivide(klas, 5, 2, true);
+        standartCheckDivide(klas, 5, 1, true);
+        standartCheckDivide(klas, 5, 0, false);
+        
+        standartCheckDivide(klas, 4, 3, true);
+        standartCheckDivide(klas, 4, 2, true);
+        standartCheckDivide(klas, 4, 1, true);
+        standartCheckDivide(klas, 4, 0, true);
+        
+        standartCheckDivide(klas, 3, 3, true);
+        standartCheckDivide(klas, 3, 2, true);
+        standartCheckDivide(klas, 3, 1, true);
+        standartCheckDivide(klas, 3, 0, false);
+        
+        standartCheckDivide(klas, 2, 3, true);
+        standartCheckDivide(klas, 2, 2, true);
+        standartCheckDivide(klas, 2, 1, true);
+        standartCheckDivide(klas, 2, 0, true);
+        
+        standartCheckDivide(klas, 1,3, true);
+        standartCheckDivide(klas, 1, 2, true);
+        standartCheckDivide(klas, 1, 1, true);
+        standartCheckDivide(klas, 1, 0, true);
+    }
+    
+    @Test
+    public void divideTest9() {
+        Group<Student> klas = createKlasOfSize(32);
+
+        standartCheckDivide(klas, 32, 0, true);
+        standartCheckDivide(klas, 32, 1, true);
+        
+        standartCheckDivide(klas, 31, 0, false);
+        standartCheckDivide(klas, 31, 1, true);
+        
+        standartCheckDivide(klas, 30, 0, false);
+        standartCheckDivide(klas, 30, 1, false);
+        
+        standartCheckDivide(klas, 29, 0, false);
+        standartCheckDivide(klas, 29, 1, false);
+        
+        standartCheckDivide(klas, 28, 0, false);
+        standartCheckDivide(klas, 28, 1, false);
+        
+        standartCheckDivide(klas, 27, 0, false);
+        standartCheckDivide(klas, 27, 1, false);
+        
+        standartCheckDivide(klas, 26, 0, false);
+        standartCheckDivide(klas, 26, 1, false);
+        
+        standartCheckDivide(klas, 25, 0, false);
+        standartCheckDivide(klas, 25, 1, false);
+        
+        standartCheckDivide(klas, 24, 0, false);
+        standartCheckDivide(klas, 24, 1, false);
+        
+        standartCheckDivide(klas, 23, 0, false);
+        standartCheckDivide(klas, 23, 1, false);
+        
+        standartCheckDivide(klas, 22, 0, false);
+        standartCheckDivide(klas, 22, 1, false);
+        
+        standartCheckDivide(klas, 21, 0, false);
+        standartCheckDivide(klas, 21, 1, false);
+        
+        standartCheckDivide(klas, 20, 0, false);
+        standartCheckDivide(klas, 20, 1, false);
+        
+        standartCheckDivide(klas, 19, 0, false);
+        standartCheckDivide(klas, 19, 1, false);
+        
+        standartCheckDivide(klas, 18, 0, false);
+        standartCheckDivide(klas, 18, 1, false);
+        
+        standartCheckDivide(klas, 17, 16, false);
+        standartCheckDivide(klas, 17, 1, true);
+        
+        standartCheckDivide(klas, 16, 0, true);
+        standartCheckDivide(klas, 16, 1, true);
+        
+        standartCheckDivide(klas, 15, 0, false);
+        standartCheckDivide(klas, 15, 1, true);
+        
+        standartCheckDivide(klas, 14, 0, false);
+        standartCheckDivide(klas, 14, 1, false);
+        
+        standartCheckDivide(klas, 13, 0, false);
+        standartCheckDivide(klas, 13, 1, false);
+        
+        standartCheckDivide(klas, 12, 0, false);
+        standartCheckDivide(klas, 12, 1, false);
+        
+        standartCheckDivide(klas, 11, 0, false);
+        standartCheckDivide(klas, 11, 1, false);
+        
+        standartCheckDivide(klas, 10, 0, false);
+        standartCheckDivide(klas, 10, 1, false);
+        
+        standartCheckDivide(klas, 9, 0, false);
+        standartCheckDivide(klas, 9, 1, true);
+        
+        standartCheckDivide(klas, 8, 0, true);
+        standartCheckDivide(klas, 8, 1, true);
+        
+        standartCheckDivide(klas, 7, 0, false);
+        standartCheckDivide(klas, 7, 1, true);
+        
+        standartCheckDivide(klas, 6, 0, false);
+        standartCheckDivide(klas, 6, 1, false);
+        
+        standartCheckDivide(klas, 5, 0, false);
+        standartCheckDivide(klas, 5, 1, true);
+        
+        standartCheckDivide(klas, 4, 0, true);
+        standartCheckDivide(klas, 4, 1, true);
+        
+        standartCheckDivide(klas, 3, 0, false);
+        standartCheckDivide(klas, 3, 1, true);
+        
+        standartCheckDivide(klas, 2, 0, true);
+        standartCheckDivide(klas, 2, 1, true);
+        
+        standartCheckDivide(klas, 1, 0, true);
+        standartCheckDivide(klas, 1, 1, true);
+    }
 }

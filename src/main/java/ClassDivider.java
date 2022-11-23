@@ -131,7 +131,6 @@ public class ClassDivider {
      *   \not (\exists j; (\result).contains(j);
      *     i != j && (\exists s; i.contains(s); j.contains(s))))
      *   && The students are divided randomly over all groups in \result.}
-     * @throws IllegalArgumentException when with the current arguments, a division is not possible.
      */
     public Set<Group<Student>> divide(Group<Student> klas, int groupSize, int deviation) {
         /*

@@ -43,12 +43,10 @@ public class ClassDivider {
         boolean groupSizeToLarge = klasSize < groupSize - deviation;
         boolean groupSizeToSmall = groupSize + deviation <= 0;
         boolean devisionByZero = groupSize <= 0;
-
         // guard statement
         if (groupSizeToLarge || groupSizeToSmall || devisionByZero) {
             return false;
         }
-
         /*
          * Now we will take a look at if it is possible based on a few cases:
          *
@@ -76,26 +74,35 @@ public class ClassDivider {
          * So we check if we can fit them into other groups with the 
          * extra tolerance the deviation in other groups gives us:
          */
-        int groupsMade = this.amountOfGroups(klasSize, groupSize);
-        int extraTolerance = deviation * groupsMade;
-        boolean spreadableOverOtherGroups = extraTolerance >= amountLeftOvers;
+        boolean spreadableOverOtherGroups = this.canSpreadLeftOvers(
+                amountLeftOvers,
+                this.amountOfGroups(klasSize, groupSize),
+                deviation
+        );
         /*
          * - Or we steal members from other groups until the leftover group is big enough.
          *      That would only be possible if the total diviation from all
          *      the groups is bigger or equal to the amound of students the 
          *      leftover groups is still missing.
          *
-         * int amountThatTheLeftOversNeeds = (groupSize - deviation) - amountLeftOvers;
-         * boolean otherGroupsCanBeStolenFrom = amountThatTheLeftOversNeeds <= extraTolerance;
-         *
-         * as You can see that is basically the same, so for simplisties sake, we'll obmit it.
-         *
-         * - Or
-         *
+         * that would mean that the amount of people we can take from other groups, plus the amount
+         * people we can steal from other groups is also a valid group:
+         */
+        int stolenPeoplePlusLeftovers = (this.amountOfGroups(klasSize, groupSize) * deviation
+                + amountLeftOvers);
+        /*
+         * now we check if that is a valid group:
+         */
+        boolean leftOverGroupIsFillable = this.isValidGroup(
+                stolenPeoplePlusLeftovers,
+                groupSize,
+                deviation
+        );
+        /*
          * Now we see if any of these cases was true, and if it is, then it must be possible to
          * divide with the given parameters:
          */
-        return (noLeftOver || leftOversAreGroup || spreadableOverOtherGroups);
+        return (leftOversAreGroup || spreadableOverOtherGroups || leftOverGroupIsFillable);
     }
 
     /**
@@ -120,13 +127,17 @@ public class ClassDivider {
      * @param deviation is the max amount of students a group can miss or have extra.
      * @return a set of groups that all have a big enough group size, and all have unique elements
      * and are all unique themselves.
+     * @post {@code (\forall i; (\result).contains(i);
+     *   \not (\exists j; (\result).contains(j);
+     *     i != j && (\exists s; i.contains(s); j.contains(s))))
+     *   && The students are divided randomly over all groups in \result.}
      * @throws IllegalArgumentException when with the current arguments, a division is not possible.
      */
     public Set<Group<Student>> divide(Group<Student> klas, int groupSize, int deviation) {
         /*
          * first we check if it is possible to devide, and if now we throw an
          * IllegalArgumentException.
-         * / we cant because of Npath BullShit.
+         * / // we cant because of Npath, but I would have liked to be able to.
         if (!this.isDividable(klas, groupSize, deviation)) {
             String errorMessage = ("With the given arguments, it is not possible to divide "
                     + "the groups.");
@@ -138,7 +149,6 @@ public class ClassDivider {
          * for easiness sake we'll use classSize instead of klas.size() using this variable:
          */
         int klasSize = klas.size();
-        int amountRemaining = klasSize;
         /* 
          * first we create a group of, groups of students. This is the Object we wish to return 
          * when all the code has run.
@@ -151,32 +161,10 @@ public class ClassDivider {
         Iterator<Student> students = klas.iterator();
         /*
          * amount of groups that definitely fits is basically: {@code Math.floor( klas.size() / 
-         * groupSize)}, however, the most save bet is to start with as small of a groups as 
-         * possible. using the minimal groupSize:
-         */
-        int minimalGroupSize = groupSize - deviation;
-        /*
-         * This also means that there might be a few leftovers, but we will deal 
+         * groupSize)}. This also means that there might be a few leftovers, but we will deal 
          * with these later. In the case distinction.
          */
-        int amountOfStartGroups;
-        /*
-         * in case the minimalGroupSize is zero, we'll get an ArithmeticException which means, 
-         * we have to try and catch the ArithmeticException.
-         */
-        try {
-            amountOfStartGroups = amountOfGroups(klasSize, minimalGroupSize);
-
-        } catch (ArithmeticException e) {
-            /*
-             * if the smallest minimalGroupSize is zero, then this will give an
-             * ArithmeticException, since you cannot devide by zero, so in that case the 
-             * minimalGroupSize is 1, since groupSize > 0, so that means, we divide:
-             *
-             * klasSize / minimalGroupSize == klasSize / 1 == klasSize
-             */
-            amountOfStartGroups = klasSize;
-        }
+        int amountOfStartGroups = amountOfGroups(klasSize, groupSize);
         /*
          * Now we'll have to create n studentGroups, where n == AmountOfStartGroups.
          */
@@ -188,15 +176,12 @@ public class ClassDivider {
             /*
              * and we'll add the GroupSize amount of students to it.
              */
-            for (int j = 0; j < minimalGroupSize; j++) {
-                // we will keep track of how many students we will have to deal with:
-                amountRemaining--;
+            for (int j = 0; j < groupSize; j++) {
                 // now we get the student,
                 Student student = students.next();
                 // and place it in a group:
                 studentGroup.add(student);
             }
-
             // now we add the created group to the set of groups.
             returnGroups.add(studentGroup);
         }
@@ -211,25 +196,21 @@ public class ClassDivider {
          * now we check in which case we are:
          *
          * Case I: There are no leftovers
-         *
-         * if (amountRemaining == 0) {
-         *     //
-         *     // Since there is no one left to divde, we return our result.
-         *     //
-         *     return returnGroups;
-         *
-         * } else..
-         * 
-         * Since we don't have to do anything if this is the case, we can have a lower 
-         * NpathComplexity if we ommit it
-         *
+         */
+        int amountOfLeftovers = this.amountLeftover(klasSize, groupSize);
+        if (amountOfLeftovers == 0) {
+            /*
+             * Since there is no one left to divde, we return our result.
+             */
+            return returnGroups;
+        }
+        /*
          * if not, we check the next case:
          *
          * Case II: we can dump all the remaining members to other groups.
-         * 
          */
-       if (this.canSpreadLeftOvers(
-                amountRemaining,
+        if (this.canSpreadLeftOvers(
+                amountOfLeftovers,
                 amountOfStartGroups,
                 deviation
         )) {
@@ -249,9 +230,20 @@ public class ClassDivider {
             /*
              * else my thing is not bullet proof, and so we throw an Exception:
              */
+        } else {
+            /*
+             * if not we add them to their own group:
+             */
+            returnGroups = this.groupOfcombinedLeftovers(
+                    returnGroups,
+                    students,
+                    klas
+            );
+            /*
+             * then we return the result
+             */
+            return returnGroups;
         }
-        
-        return returnGroups;
     }
 
     /**
@@ -265,17 +257,13 @@ public class ClassDivider {
      * @param returnGroups is the set of groups that is already created
      * @param students is the iterator to go over the set of students in the klas
      * @param klas is a set of students.
-     * @param groupSize is the size a group should be.
-     * @param deviation is the max amount a group of students can miss or have extra.
      * @return A group of students, where all the elements within are unique. only appear once in
      * total.
      */
-    protected Group<Student> groupOfcombinedLeftovers(
+    protected Group<Group<Student>> groupOfcombinedLeftovers(
             Group<Group<Student>> returnGroups,
             Iterator<Student> students,
-            Group<Student> klas,
-            int groupSize,
-            int deviation
+            Group<Student> klas
     ) {
         /*
          * we create an new group where we put the leftovers in.
@@ -287,8 +275,10 @@ public class ClassDivider {
         while (students.hasNext()) {
             leftoversGroup.add(students.next());
         }
+        // we add the group, and return the result:
+        returnGroups.add(leftoversGroup);
         // we return the result
-        return leftoversGroup;
+        return returnGroups;
     }
 
     /**
@@ -325,7 +315,7 @@ public class ClassDivider {
                 groups = returnGroups.iterator();
             }
         }
-    // we return the result
+        // we return the result
         return returnGroups;
     }
 
@@ -384,6 +374,6 @@ public class ClassDivider {
      * }
      */
     protected boolean canSpreadLeftOvers(int leftOvers, int amountOfGroupsMade, int deviation) {
-        return ((deviation * amountOfGroupsMade) > leftOvers);
+        return ((deviation * amountOfGroupsMade) >= leftOvers);
     }
 }

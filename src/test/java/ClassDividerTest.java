@@ -14,7 +14,6 @@ public class ClassDividerTest {
 
     private int runCounter = 0;
     private ClassDivider instance;
-    private PrintGroups groupPrinter = new PrintGroups();
 
     /**
      * Tests the divide method of the ClassDivider object.
@@ -33,92 +32,108 @@ public class ClassDividerTest {
 
         this.instance = new ClassDivider();
         String message = "";
-        
-        boolean checky =  this.instance.isDividable(klas, groupSize, deviation);
-        message = (
-                "subTest 1: expectation does not match instance.isDividable"
-                + "(klas, groupSize, deviation).\n"
+        /*
+         * else we procceed:
+         *
+         * subTest 1:
+         *
+         * SetUp:
+         */
+        Set<Group<Student>> splittedKlas = this.instance.divide(klas, groupSize, deviation);
+        Iterator<Group<Student>> groups = splittedKlas.iterator();
+        this.runCounter++;
+        /*
+         * print what it is working on:
+         */
+        System.out.println(
+                "+-----------------------------------------------------------------------+\n"
+                + "    TestRunID = " + this.runCounter + "\n"
+                + "+-----------------------------------------------------------------------+\n"
                 + "int klas.size() = " + klas.size() + ",\n"
                 + "int groupSize = " + groupSize + ",\n"
-                + "int deviation = " + deviation + ",\n"
-                + "boolean expectation = " + expectation + ",\n"
-                + "boolean program = " + checky
-                + "\n"
-                );
+                + "int deviation = " + deviation + ";\n"
+        );
+        /*
+         * we'll use these variables to keep track of what is done well
+         */
+        boolean goodSize = this.checkSize(groups, groupSize, deviation);
+        boolean noDoubles = this.checkForDoubles(splittedKlas);
+        /*
+         * if the size was good, and there are no doubles, then the result is also good, 
+         * otherwise, the result is bad.
+         */
+        boolean result = goodSize && noDoubles;
+        /*
+         * Now that we have cheched if the result is valid (and therefor True) we will test it,
+         * if it is not we print out what the state was using this look a like'dictionary'.
+         */
+        message = ("dictionary variables = {\n"
+                + "    \"klas\" : " + klas.toString() + "\n"
+                + "    \"klas.size()\" : " + klas.size() + ",\n"
+                + "    \"splittedKlas\" : [\n" 
+                + this.setOfGroupsToString(splittedKlas)
+                + "    ],\n"
+                + "    \"splittedKlas.size()\" : " + splittedKlas.size() + ",\n"
+                + "    \"groupSize\" : " + groupSize + ",\n"
+                + "    \"deviation\" : " + deviation + ",\n"
+                + "    \"TestRunID\" : " + this.runCounter + ",\n"
+                + "    \"result\" : " + result + ",\n"
+                + "    \"goodSize\" : " + goodSize + ",\n"
+                + "    \"noDoubles\" : " + noDoubles + ",\n"
+                + "};");
 
-        // subTest 1:
-        assertEquals(expectation, checky, message);
-
-        // subTest 2:
-        try {
-            // subTest 2.1:
-            Set<Group<Student>> splittedKlas = this.instance.divide(klas, groupSize, deviation);
-
-            Iterator<Group<Student>> groups = splittedKlas.iterator();
-            this.runCounter++;
-            System.out.println(
-                    "+-----------------------------------------------------------------------+\n"
-                    + "    TestRunID = " + this.runCounter + "\n"
-                    + "+-----------------------------------------------------------------------+\n"
-                    + "int klas.size() = " + klas.size() + ",\n"
-                    + "int groupSize = " + groupSize + ",\n"
-                    + "int deviation = " + deviation + ";\n"
-            );
-
-            /*
-             * We will run over every group to see if each group has the right size
-             */
-            boolean result = true;
-            while (groups.hasNext()) {
-                /*
-                 * the group we will check
-                 */
-                Group<Student> groupOfStudents = groups.next();
-                /* 
-                 * If there is one group that is not the right size, then it will be false, since
-                 * it is a big conjunction.
-                 */
-                result = (result
-                        && (groupOfStudents.size() <= groupSize + deviation)
-                        && (groupOfStudents.size() >= groupSize - deviation));
-            }
-            /*
-             * Now that we have cheched if the result is valid (and therefor True) we will test it,
-             * if it is not we print out what the state was using this look a like'dictionary'.
-             */
-            message = ("dictionary variables = {\n"
-                    + "    \"klas\" : \n" + klas.toString() + "\n"
-                    + "    \"klas.size()\" : " + klas.size() + ",\n"
-                    + "    \"splittedKlas\" : [\n" 
-                    + this.groupPrinter.setOfGroupsToString(splittedKlas)
-                    + "    ],\n"
-                    + "    \"splittedKlas.size()\" : " + splittedKlas.size() + ",\n"
-                    + "    \"groupSize\" : " + groupSize + ",\n"
-                    + "    \"deviation\" : " + deviation + ",\n"
-                    + "    \"TestRunID\" : " + this.runCounter + ",\n"
-                    + "};");
-            
-            assertEquals(
-                    true,
-                    result,
-                    message
-            );
-
-        } catch (IllegalArgumentException e) {
-            /*
-             * if it is not possible to divide it will throw an error, so if it is not possible to 
-             * devide we will end up here in the catch, we then see if we expected it to not be 
-             * possible to divide, and if it is not possible we are fine, if it was possible when
-             * it should not be, we will see the error message:
-             */
-            //subTest 3:
-            message = ("subTest 3: program thought that it was possible to divide the given set "
-                    + "into groups in reality it is not possible.");
-            assertEquals(false, expectation, message);
-        }
+        assertEquals(
+                true,
+                result,
+                message
+        );
     }
-
     
+    private boolean checkSize(Iterator<Group<Student>> groups, int groupSize, int deviation) {
+        boolean goodSize = true;
+        /*
+         * We will run over every group to see if each group has the right size
+         */
+        while (groups.hasNext()) {
+            /*
+             * the group we will check
+             */
+            Group<Student> groupOfStudents2 = groups.next();
+            /* 
+             * If there is one group that is not the right size, then it will be false, since
+             * it is a big conjunction.
+             */
+            goodSize = (goodSize
+                    && (groupOfStudents2.size() <= groupSize + deviation)
+                    && (groupOfStudents2.size() >= groupSize - deviation));
+        }
+        return goodSize;
+    }
+    
+    private boolean checkForDoubles(Set<Group<Student>> splittedKlas) {
+        boolean noDoubles = true;
+        /*
+         * now that we have checked the size of all groups, we will see if they containany
+         * students that are also in other groups:
+         */
+        for (Group group1 : splittedKlas) {
+            for (Group group2 : splittedKlas) {
+                if (!(group1.equals(group2))) {
+                    noDoubles = noDoubles && noDoubleGanger(group1, group2);
+                }
+            }
+        }
+        return noDoubles;
+    }
+    
+    private boolean noDoubleGanger(Group<Student> group1, Group<Student> group2) { 
+        for (Student s : group1) { // \exists s
+            if (group2.contains(s)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     private Group<Student> createKlasOfSize(int n) {
 
@@ -816,5 +831,59 @@ public class ClassDividerTest {
 
         standartCheckDivide(klas, 1, 0, true);
         standartCheckDivide(klas, 1, 1, true);
+    }
+
+    /**
+     * This gets the ID's of every student in a Group, then puts that into an array, and then puts
+     * all those array's for every group into an Array of it self, and then returns it as a String.
+     *
+     * @pre {@code splittedKlas != null && splittedKlas.contains(group)} where
+     * {@code group == Group<Students> && group != null && group.contains(student)} where
+     * {@code Student != null}
+     * @param splittedKlas a Set of groups of students.
+     * @return a string what looks like an array of array's of Students.
+     */
+    private String setOfGroupsToString(Set<Group<Student>> splittedKlas) {
+        String returnString = "";
+        /*
+         * We get an iterator to go over the groups
+         */
+        Iterator<Group<Student>> groups = splittedKlas.iterator();
+        /*
+         * for as long as there groups, we go over them
+         */
+        while (groups.hasNext()) {
+            /*
+             * we pick the group
+             */
+            Group<Student> group = groups.next();
+            /*
+             * and go over it at random
+             */
+            Iterator<Student> students = group.iterator();
+            /*
+             * we begin the array
+             */
+            returnString = returnString + "        [ ";
+            /*
+             * while there are students, we print them
+             */
+            while (students.hasNext()) {
+                /*
+                 * we get the student
+                 */
+                Student student = students.next();
+                /*
+                 * and add their ID to the String and seperate it with the Sting ", "
+                 */
+                returnString = returnString + student.getID() + ", ";
+            }
+            /*
+             * we close the this array
+             */
+            returnString = returnString + " ],\n";
+        }
+        // we return the result
+        return returnString;
     }
 }

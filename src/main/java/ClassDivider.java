@@ -165,9 +165,7 @@ public class ClassDivider {
          * if with the current amount of groups and their deviation and size we cannot store all
          * the students, then we'll need one more.
          */
-        if ((groupSize + deviation) * groupAmount < klas.size()) {
-            groupAmount++;
-        }
+        groupAmount = addGroupIfNeeded(groupAmount, groupSize, deviation, klas.size());
         /*
          * now we'll make the groups, to later fill up:
          */
@@ -198,6 +196,17 @@ public class ClassDivider {
         return new HashSet<Group<Student>>(returnGroups);
     }
 
+    private int addGroupIfNeeded(int groupAmount, int groupSize, int deviation, int klasSize) {
+        /*
+         * if with the current amount of groups and their deviation and size we cannot store all
+         * the students, then we'll need one more.
+         */
+        if ((groupSize + deviation) * groupAmount < klasSize) {
+            groupAmount++;
+        }
+        return groupAmount;
+    }
+    
     /**
      * fills the leftover group with everyone that is still remaining without a
      * group.

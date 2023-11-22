@@ -792,7 +792,7 @@ public class ClassDividerTest {
                 /*
                  * and add their ID to the String and seperate it with the Sting ", "
                  */
-                returnString = returnString + student.getID() + ", ";
+                returnString = returnString + student.ID() + ", ";
             }
             /*
              * we close the this array
